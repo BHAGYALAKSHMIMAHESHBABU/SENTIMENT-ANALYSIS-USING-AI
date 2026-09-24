@@ -1,0 +1,12 @@
+Phase 5 BiLSTM — Classification Report (Test Set)
+============================================================
+
+              precision    recall  f1-score   support
+
+    negative     0.6370    0.6841    0.6597      2352
+     neutral     0.6397    0.6173    0.6283      1829
+    positive     0.6958    0.6633    0.6792      2349
+
+    accuracy                         0.6579      6530
+   macro avg     0.6575    0.6549    0.6557      6530
+weighted avg     0.6589    0.6579    0.6579      6530

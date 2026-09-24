@@ -1,0 +1,108 @@
+======================================================================
+PHASE 2 - BASELINE MODEL REPORT
+AI-Based Sentiment Analysis System
+======================================================================
+
+[ENVIRONMENT]
+  Python      : 3.13.15
+  scikit-learn: 1.5.2
+  scipy       : 1.14.1
+  numpy       : 2.2.6
+  pandas      : 3.0.5
+
+[CLEANED DATASET SIZES USED FOR MODELING]
+  Train : 102,077
+  Val   : 5,420
+  Test  : 6,530
+
+[TF-IDF CONFIGURATION]
+  ngram_range         : (1, 2)
+  sublinear_tf        : True
+  min_df              : 2
+  max_df              : 0.95
+  strip_accents       : unicode
+  analyzer            : word
+  Vocabulary size     : 123,493 features
+  Fitted on train only. Val + Test are transformed only.
+  Saved: models/tfidf_vectorizer.pkl
+
+[LOGISTIC REGRESSION CONFIGURATION]
+  class_weight        : balanced
+  max_iter            : 1000
+  random_state        : 42
+  solver              : lbfgs
+  multi_class         : multinomial
+  C                   : 1.0
+  Classes             : ['negative', 'neutral', 'positive']
+  random_state        : 42
+  Saved: models/logistic_regression_baseline.pkl
+
+[VALIDATION EVALUATION]
+  Accuracy         : 0.6531  (65.31%)
+  Macro F1         : 0.6529
+  Weighted F1      : 0.6533
+  Macro Precision  : 0.6535
+  Macro Recall     : 0.6540
+
+  Per-class Report:
+              precision    recall  f1-score   support
+
+    negative     0.6653    0.6279    0.6461      1868
+     neutral     0.6123    0.6769    0.6429      1668
+    positive     0.6828    0.6571    0.6697      1884
+
+    accuracy                         0.6531      5420
+   macro avg     0.6535    0.6540    0.6529      5420
+weighted avg     0.6551    0.6531    0.6533      5420
+
+
+  Confusion Matrix (rows=actual, cols=predicted):
+  Labels order: ['negative', 'neutral', 'positive']
+    negative  : [1173, 365, 330]
+    neutral   : [294, 1129, 245]
+    positive  : [296, 350, 1238]
+
+[TEST EVALUATION]
+  Accuracy         : 0.6629  (66.29%)
+  Macro F1         : 0.6611
+  Weighted F1      : 0.6635
+  Macro Precision  : 0.6606
+  Macro Recall     : 0.6625
+
+  Per-class Report:
+              precision    recall  f1-score   support
+
+    negative     0.6640    0.6454    0.6546      2352
+     neutral     0.6077    0.6572    0.6315      1829
+    positive     0.7101    0.6850    0.6973      2349
+
+    accuracy                         0.6629      6530
+   macro avg     0.6606    0.6625    0.6611      6530
+weighted avg     0.6648    0.6629    0.6635      6530
+
+
+  Confusion Matrix (rows=actual, cols=predicted):
+  Labels order: ['negative', 'neutral', 'positive']
+    negative  : [1518, 448, 386]
+    neutral   : [356, 1202, 271]
+    positive  : [412, 328, 1609]
+
+[CONFUSION MATRIX]
+  Saved: outputs/baseline_confusion_matrix.png
+
+[PREDICTIONS SAVED]
+  Val  predictions: outputs/baseline_predictions_val.csv
+  Test predictions: outputs/baseline_predictions.csv
+  Columns: sentence, actual_label, predicted_label, correct, negative_probability, neutral_probability, positive_probability
+
+[WARNINGS AND LIMITATIONS]
+  1. Train set has 1 conflicting-label sentence ('The service was okay.') retained without resolution.
+  2. 3 train/test overlapping sentences removed from train (including 1 with a label conflict: 'I could not finish it.').
+  3. TF-IDF discards word order and emoji features; linguistic features will be used in later phases.
+  4. Logistic Regression with class_weight='balanced' compensates for the moderate Neutral-skew in the training set.
+  5. This is a BASELINE model only. Do not treat as final.
+
+[SAVED MODEL PATHS]
+  models/tfidf_vectorizer.pkl
+  models/logistic_regression_baseline.pkl
+======================================================================

@@ -1,0 +1,45 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Environment/secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs/temp
+*.log
+*.tmp
+*.temp
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large trained model artifacts
+models/phase7_distilbert/
+models/*.keras
+
+# Generated experiment outputs
+outputs/phase3/*predictions*.csv
+outputs/phase4/*predictions*.csv
+outputs/phase5/*predictions*.csv
+outputs/phase6/*predictions*.csv
+outputs/phase7/*predictions*.csv
+
+# Large feature datasets
+outputs/phase4/linguistic_features_train.csv

@@ -1,0 +1,4 @@
+model,accuracy,macro_precision,macro_recall,macro_f1,weighted_f1
+Phase 2 Baseline (TF-IDF + LR),0.6629,0.6606,0.6625,0.6611,0.6635
+Phase 4 Enhanced (TF-IDF + LingFeats + LR),0.6669,0.6651,0.668,0.6657,0.6674
+Phase 5 BiLSTM (Trained from scratch),0.6579,0.6575,0.6549,0.6557,0.6579

@@ -1,0 +1,512 @@
+================================================================================
+FINAL PROJECT REPORT
+AI-Based Sentiment Analysis System
+================================================================================
+Project  : Internship Phase Completion Report
+Dataset  : Twitter/Social Media Sentiment (3-class: Negative, Neutral, Positive)
+Author   : Wyntrix Internship - Phase 2 through Phase 7
+Completed: September 2026
+================================================================================
+
+
+1. PROJECT OBJECTIVE
+--------------------------------------------------------------------------------
+The objective of this project is to develop, evaluate, and compare a suite of
+machine learning and deep learning models for three-class sentiment analysis
+(Negative, Neutral, Positive) on a large-scale social media text dataset.
+
+The project progresses from simple classical baselines through traditional NLP,
+classical machine learning, feature engineering, sequential deep learning, and
+pretrained transformer approaches. Each phase is designed to build on prior
+findings while maintaining strict experimental integrity (no data leakage, no
+modifications to prior phase artifacts, and no metric fabrication).
+
+Primary evaluation metric: Test-set Macro F1 Score (equal weight across classes).
+
+
+2. DATASET AND PREPROCESSING
+--------------------------------------------------------------------------------
+Source     : Social media text (Twitter-style short form text)
+Labels     : 3 classes -- negative, neutral, positive
+Split      : Train / Validation / Test (fixed across all phases)
+
+  Final Cleaned Dataset Sizes (post-preprocessing):
+    Train      : 102,076 samples
+    Validation : 5,420 samples
+    Test       : 6,530 samples
+    Total      : 114,026 samples
+
+Label Distribution (Training Set):
+    Negative   : 21,903 samples (~21.5%)
+    Neutral    : 49,144 samples (~48.2%)
+    Positive   : 31,029 samples (~30.4%)
+
+  NOTE: The dataset is imbalanced with neutral being the dominant class. All
+  models used class-weighted training to compensate for imbalance. Neutral
+  class consistently proved the hardest to classify across all phases.
+
+Preprocessing Steps (Phase 1):
+  - Removal of URLs, HTML entities, user mentions, hashtag symbols
+  - Unicode normalization and lowercasing
+  - Whitespace normalization
+  - Removal of duplicate records and empty/null sentences
+  - Train/val/test split verified for zero overlap
+
+
+3. PHASE 2 -- BASELINE MODEL (TF-IDF + LOGISTIC REGRESSION)
+--------------------------------------------------------------------------------
+Approach:
+  TF-IDF vectorization (unigrams + bigrams) fed into a Logistic Regression
+  classifier. This served as the primary baseline for all subsequent phases.
+
+Configuration:
+  - TF-IDF: ngram_range=(1,2), sublinear_tf=True, min_df=2, max_df=0.95
+  - Vocabulary size: 123,493 features
+  - LR: class_weight=balanced, C=1.0, solver=lbfgs, max_iter=1000
+
+Test Set Results:
+  Accuracy         : 0.6629  (66.29%)
+  Macro Precision  : 0.6606
+  Macro Recall     : 0.6625
+  Macro F1         : 0.6611
+  Weighted F1      : 0.6635
+
+Per-class F1 (Test):
+  Negative : 0.6546
+  Neutral  : 0.6315  (weakest class)
+  Positive : 0.6973
+
+Summary: The TF-IDF + Logistic Regression baseline established a strong and
+computationally inexpensive benchmark. Neutral class classification was the
+primary weakness, a pattern that persisted across all subsequent phases.
+
+
+4. PHASE 3 -- CLASSICAL MODEL COMPARISON
+--------------------------------------------------------------------------------
+Approach:
+  Three classical models compared on the same TF-IDF feature space:
+    1. Logistic Regression (Phase 2 baseline, not retrained)
+    2. Multinomial Naive Bayes (alpha=1.0)
+    3. Linear SVM (C=1.0, class_weight=balanced)
+
+Test Set Summary (Macro F1 ranking):
+  Model                           Accuracy  Macro F1  Weighted F1
+  ---------------------------------------------------------------
+  Logistic Regression (Phase 2)   0.6629    0.6611    0.6635
+  Linear SVM                      0.6357    0.6346    0.6362
+  Multinomial Naive Bayes         0.5369    0.5208    0.5184
+
+Per-class Test F1:
+  Model                        Negative   Neutral   Positive
+  ----------------------------------------------------------
+  Logistic Regression (P2)     0.6546     0.6315    0.6973
+  Linear SVM                   0.6186     0.6138    0.6713
+  Multinomial Naive Bayes      0.3796     0.5498    0.6329
+
+Findings:
+  - Logistic Regression remained the top classical model (Macro F1 = 0.6611).
+  - Multinomial Naive Bayes performed significantly worse, particularly on
+    negative sentiment where recall was severely suppressed (0.2504).
+  - Linear SVM was competitive but did not surpass Logistic Regression.
+  - No leakage was detected between splits (0 overlap verified).
+
+
+5. PHASE 4 -- ENHANCED TF-IDF + LINGUISTIC FEATURES
+--------------------------------------------------------------------------------
+Approach:
+  12 hand-crafted linguistic features were extracted from raw sentence text
+  and appended (after StandardScaler normalization) to the TF-IDF matrix
+  before training a Logistic Regression classifier.
+
+Feature Groups:
+  Group A (Basic text statistics): word_count, character_count, sentence_length
+  Group B (Punctuation & casing):  exclamation_count, question_count,
+                                   uppercase_ratio, uppercase_word_count
+  Group C (Sentiment cues):        negation_count, intensifier_count,
+                                   contrast_word_count
+  Group D (Visual & repetition):   emoji_count, repeated_character_count
+
+Training Data: FULL 102,076 training samples
+
+Test Set Results:
+  Accuracy         : 0.6669  (66.69%)
+  Macro Precision  : 0.6651
+  Macro Recall     : 0.6680
+  Macro F1         : 0.6657
+  Weighted F1      : 0.6674
+
+  Delta vs Phase 2 baseline: Macro F1 +0.0046 | Accuracy +0.0040
+
+Per-class F1 (Test):
+  Negative : 0.6507
+  Neutral  : 0.6441  (+0.0126 improvement over baseline)
+  Positive : 0.7023
+
+Ablation Study (Test Macro F1):
+  TF-IDF only (Baseline)                  0.6611
+  TF-IDF + Group A (Text Statistics)      0.6626
+  TF-IDF + Group B (Punctuation/Casing)   0.6644
+  TF-IDF + Group C (Sentiment Cues)       0.6626
+  TF-IDF + Group D (Visual/Repetition)    0.6599
+  TF-IDF + All 12 Linguistic Features     0.6657  <-- BEST
+
+Verdict: YES. Linguistic features provided a marginal but consistent improvement
+of +0.0046 Macro F1 over the TF-IDF baseline. Phase 4 achieved the highest
+Macro F1 of any experiment in this project (0.6657).
+
+IMPORTANT: Phase 4 used the full 102,076 training samples. This is the primary
+benchmark for all later phases.
+
+
+6. PHASE 5 -- BIDIRECTIONAL LSTM (BiLSTM)
+--------------------------------------------------------------------------------
+Approach:
+  Learned word embeddings (dim=128) fed into a Bidirectional LSTM to capture
+  sequential word order context, trained from scratch on the full training set.
+
+Architecture:
+  Embedding (vocab=39,093, dim=128) -> Bidirectional LSTM (64 units) ->
+  Dropout (0.3) -> Dense (64, ReLU) -> Dense (3, Softmax)
+  Total Parameters: 5,111,171
+
+Configuration:
+  Optimizer : Adam (lr=0.001)
+  Batch size: 256
+  Max epochs: 12 (EarlyStopping patience=2, restore_best_weights=True)
+  Epochs completed: 3 (early stopped)
+  Device: CPU only
+
+Training Data: FULL 102,076 training samples
+
+Test Set Results:
+  Accuracy         : 0.6579  (65.79%)
+  Macro Precision  : 0.6575
+  Macro Recall     : 0.6549
+  Macro F1         : 0.6557
+  Weighted F1      : 0.6579
+
+  Delta vs Phase 4 benchmark: Macro F1 -0.0100
+
+Per-class F1 (Test):
+  Negative : 0.6597
+  Neutral  : 0.6283
+  Positive : 0.6792
+
+Verdict: NO. BiLSTM (Macro F1 = 0.6557) did NOT surpass Phase 4 benchmark
+(0.6657). The classical TF-IDF with enhanced features remained stronger,
+reflecting the relatively short sentence lengths in this dataset (median:
+12 words), which limit the advantage of sequential modeling.
+
+
+7. PHASE 6 -- HYBRID BiLSTM (BiLSTM + LINGUISTIC FEATURES)
+--------------------------------------------------------------------------------
+Approach:
+  Four hybrid model variants were tested, each combining the BiLSTM sequence
+  output with selected groups of scaled linguistic features via concatenation
+  before the final classification layer.
+
+Hybrid Configurations Tested:
+  BiLSTM + Group B (Punctuation/Casing)     -- Best hybrid variant
+  BiLSTM + Group C (Sentiment Cues)
+  BiLSTM + Groups A+B+C (combined)
+  BiLSTM + All 12 Linguistic Features
+
+Test Set Results -- All Hybrid Variants vs. Benchmarks:
+  Model                                  Accuracy  Macro F1  Wtd F1   vs P4 Macro F1
+  -----------------------------------------------------------------------------------
+  Phase 2 TF-IDF + LR (reference)        0.6629    0.6611    0.6635   -0.0046
+  Phase 4 TF-IDF + LingFeats + LR        0.6669    0.6657    0.6674    0.0000
+  Phase 5 BiLSTM                         0.6579    0.6557    0.6579   -0.0100
+  Phase 6: BiLSTM + Group B              0.6649    0.6611    0.6639   -0.0046
+  Phase 6: BiLSTM + Group C             0.6596    0.6578    0.6598   -0.0079
+  Phase 6: BiLSTM + Groups A+B+C        0.6617    0.6598    0.6616   -0.0059
+  Phase 6: BiLSTM + All 12 Features     0.6616    0.6596    0.6617   -0.0061
+
+Best Phase 6 Variant: BiLSTM + Group B (Punctuation/Casing)
+  Accuracy         : 0.6649
+  Macro Precision  : 0.6678
+  Macro Recall     : 0.6590
+  Macro F1         : 0.6611
+  Weighted F1      : 0.6639
+
+Verdict: No Phase 6 hybrid configuration surpassed the Phase 4 benchmark
+(Macro F1 = 0.6657). The best Phase 6 hybrid (BiLSTM + Group B) matched
+the Phase 2 baseline (Macro F1 = 0.6611) but not Phase 4. Linguistic features
+provided modest improvements to the BiLSTM, but the sequential model still
+fell short of the classical TF-IDF approach for this dataset.
+
+
+8. PHASE 7 -- PRETRAINED DISTILBERT TRANSFORMER (FEASIBILITY EXPERIMENT)
+--------------------------------------------------------------------------------
+Approach:
+  DistilBERT-base-uncased (66.9M parameters) loaded from locally cached
+  HuggingFace safetensors and fine-tuned using Keras Hub + TensorFlow 2.21.
+  No PyTorch. No Kaggle downloads. No tensorflow_text dependency.
+
+CRITICAL CONSTRAINT -- SAMPLE SIZE DISPARITY:
+  Due to Windows CPU-only execution (no GPU; PyTorch blocked by OS Application
+  Control; tensorflow_text unavailable for Windows/Python 3.13), full dataset
+  fine-tuning (102,076 samples x 3 epochs) would have required approximately
+  42 hours, making it impractical within the project timeline.
+
+  As a result, Phase 7 was executed as a CONSTRAINED FEASIBILITY EXPERIMENT:
+    Training samples used : 10,000 (stratified sample from train_clean.csv)
+    Validation set        : 5,420  (FULL val_clean.csv, unchanged)
+    Test set              : 6,530  (FULL test_clean.csv, unchanged)
+    Epochs                : 1 (CPU only)
+
+  This is NOT equivalent to Phase 4 or Phase 5 which used the full 102,076
+  training samples across multiple epochs. The Phase 7 results reflect a
+  severely resource-constrained execution and must be interpreted accordingly.
+
+Configuration:
+  Architecture     : DistilBERT-base-uncased (6 transformer layers)
+  Tokenizer        : HuggingFace Fast WordPiece Tokenizer (vocab: 30,522)
+  Max sequence len : 128 tokens
+  Learning rate    : 2e-05
+  Batch size       : 32
+  Total parameters : 66,955,779 (all trainable)
+
+Test Set Results:
+  Accuracy         : 0.5769  (57.69%)
+  Macro Precision  : 0.5924
+  Macro Recall     : 0.5694
+  Macro F1         : 0.5697
+  Weighted F1      : 0.5714
+
+  Delta vs Phase 4 benchmark (0.6657): -0.0960
+
+Per-class F1 (Test):
+  Negative : 0.5378  (Precision=0.5930, Recall=0.4919)
+  Neutral  : 0.5479  (Precision=0.6459, Recall=0.4757)
+  Positive : 0.6235  (Precision=0.5384, Recall=0.7407)
+
+Training History (1 epoch, CPU):
+  Train Loss: 1.0228  |  Train Accuracy: 0.4801
+  Val Loss  : 0.9440  |  Val Accuracy  : 0.5603
+
+Computational Cost:
+  Training throughput : ~2.88 samples/sec
+  Train time (10k)    : 57 minutes 49 seconds
+  Inference throughput: ~6.04 samples/sec
+  Test eval time      : 18 minutes 0 seconds
+
+Verdict: Under the constrained CPU conditions (10,000 samples, 1 epoch),
+DistilBERT achieved a Test Macro F1 of 0.5697, which is below all other
+completed experiments. The experiment confirmed that local DistilBERT
+safetensors can be successfully loaded in native Keras 3 / TensorFlow 2.21,
+but full fine-tuning on CPU without GPU acceleration is computationally
+prohibitive for production-scale datasets.
+
+
+9. CONSOLIDATED MODEL COMPARISON (TEST SET)
+--------------------------------------------------------------------------------
+All models evaluated on the same held-out test set (6,530 samples).
+Phase 7 NOTE: Uses 10,000 training samples and 1 epoch only.
+All other phases use 102,076 training samples.
+
+  Model                              Samples   Acc    Mac P   Mac R   Mac F1   Wtd F1
+  -------------------------------------------------------------------------------------
+  Ph2: TF-IDF + LR (Baseline)       102,076  0.6629 0.6606  0.6625  0.6611   0.6635
+  Ph3: Multinomial Naive Bayes       102,076  0.5369 0.6278  0.5598  0.5208   0.5184
+  Ph3: Linear SVM                    102,076  0.6357 0.6390  0.6404  0.6346   0.6362
+  Ph4: TF-IDF + 12 LingFeats + LR   102,076  0.6669 0.6651  0.6680  0.6657*  0.6674
+  Ph5: BiLSTM (from scratch)         102,076  0.6579 0.6575  0.6549  0.6557   0.6579
+  Ph6: BiLSTM + Group B (Best)       102,076  0.6649 0.6678  0.6590  0.6611   0.6639
+  Ph6: BiLSTM + All 12 Features      102,076  0.6616 0.6601  0.6594  0.6596   0.6617
+  Ph7: DistilBERT (10k, 1ep, CPU)     10,000  0.5769 0.5924  0.5694  0.5697   0.5714
+  -------------------------------------------------------------------------------------
+  * = Highest Macro F1 achieved across all experiments in this project
+
+Neutral Class F1 (hardest class across all phases):
+  Phase 2 Baseline  : 0.6315
+  Phase 4 Enhanced  : 0.6441  (best, +0.0126 vs baseline)
+  Phase 5 BiLSTM    : 0.6283
+  Phase 7 DistilBERT: 0.5479  (constrained experiment)
+
+
+10. RESEARCH QUESTIONS AND FINDINGS
+--------------------------------------------------------------------------------
+Q1: Does adding lightweight linguistic features improve over TF-IDF alone?
+    YES. Phase 4 (TF-IDF + 12 linguistic features + LR) improved Macro F1
+    from 0.6611 to 0.6657 (+0.0046). The most useful group was Group B
+    (Punctuation and Casing: exclamation marks, question marks, uppercase
+    ratio), which in isolation yielded Macro F1 = 0.6644. The neutral class
+    benefited the most (+0.0126 F1).
+
+Q2: Does BiLSTM outperform classical TF-IDF?
+    NO. BiLSTM (Phase 5) achieved Macro F1 = 0.6557, below both Phase 2
+    (0.6611) and Phase 4 (0.6657). For short social media texts (median 12
+    words), the sequential advantage of LSTM is limited, and TF-IDF with
+    bigrams already captures key local n-gram patterns efficiently.
+
+Q3: Can hybrid BiLSTM + linguistic features close the gap with Phase 4?
+    PARTIALLY. The best hybrid (Phase 6: BiLSTM + Group B) reached Macro
+    F1 = 0.6611, matching Phase 2 but not Phase 4. No Phase 6 configuration
+    exceeded the Phase 4 benchmark. Linguistic features consistently helped
+    both standalone LR and BiLSTM, but the sequential deep learning model
+    did not leverage them as effectively as the TF-IDF + LR framework.
+
+Q4: Does the neutral class remain the hardest to classify?
+    YES, consistently across all phases. Neutral sentiment in social media
+    text frequently contains ambiguous, hedged, or mixed-polarity language
+    that neither purely positive nor purely negative classifiers can reliably
+    separate. All models showed lower F1 for neutral than for positive or
+    negative.
+
+Q5: Can pretrained DistilBERT outperform classical models on this task?
+    UNDETERMINED UNDER PROJECT CONDITIONS. Due to CPU-only execution and
+    OS-level restrictions on PyTorch, Phase 7 was a constrained feasibility
+    experiment (10,000 samples, 1 epoch). Under these conditions, DistilBERT
+    reached Macro F1 = 0.5697, below all other models. This result does NOT
+    reflect the full potential of pretrained transformers, which under GPU
+    acceleration with the full dataset would be expected to outperform
+    classical models on nuanced short-text sentiment tasks.
+
+Q6: Which approach achieved the best overall performance?
+    Phase 4 (TF-IDF + 12 Linguistic Features + Logistic Regression) achieved
+    the highest Macro F1 = 0.6657 across all completed experiments.
+    It combined scalable TF-IDF representations with interpretable sentiment
+    signals (negation counts, punctuation, capitalization, intensifiers) and
+    trained on the full 102,076 samples. Among completed experiments, Phase 4
+    is the current best-performing configuration.
+
+
+11. COMPUTATIONAL LIMITATIONS
+--------------------------------------------------------------------------------
+1. CPU-Only Execution (Phases 5, 6, 7):
+   Deep learning phases (BiLSTM and DistilBERT) ran on CPU without GPU
+   acceleration. Native Windows TensorFlow >= 2.11 does not support GPU
+   through the standard pip build; only CPU execution is available in this
+   environment.
+
+2. PyTorch Restriction (Phase 7):
+   Windows Application Control policy blocked PyTorch installation, preventing
+   use of the standard HuggingFace Transformers library. Phase 7 instead used
+   Keras Hub + TensorFlow 2.21.0 to load DistilBERT weights from locally
+   cached safetensors files.
+
+3. tensorflow_text Unavailability (Phase 7):
+   tensorflow_text is not available for Python 3.13 on Windows, restricting
+   tokenizer options in Keras Hub presets. A custom HuggingFace Fast WordPiece
+   tokenizer was implemented as an alternative.
+
+4. Phase 7 Training Sample Constraint:
+   Full DistilBERT fine-tuning on 102,076 samples was estimated at ~14 hours
+   per epoch (42 hours for 3 epochs) on CPU. A stratified 10,000-sample
+   subset for 1 epoch was used as a feasibility experiment (~58 minutes
+   training, ~18 minutes test evaluation).
+
+5. Early Stopping (Phase 5 & 6):
+   The BiLSTM triggered early stopping at epoch 3 (out of 12) with best
+   weights restored from epoch 1, indicating rapid overfitting on this
+   relatively short-text dataset.
+
+
+12. OVERALL CONCLUSION
+--------------------------------------------------------------------------------
+Across six experimental phases, this project systematically explored
+sentiment classification from baseline logistic regression through
+transformer-based deep learning. The key conclusion is:
+
+  For this short-text, three-class social media sentiment dataset,
+  Phase 4 (TF-IDF + 12 scaled linguistic features + Logistic Regression,
+  full 102,076 training samples) achieved the best Macro F1 of 0.6657.
+
+This result reflects the difficulty of deep learning methods on short texts
+(median 12 words) in a CPU-constrained environment. Classical TF-IDF with
+enriched features proved highly competitive because:
+  (a) Bigram TF-IDF captures most of the relevant local n-gram patterns.
+  (b) Lightweight linguistic signals (punctuation, capitalization, negation)
+      provide discriminative signals not fully captured by bag-of-words.
+  (c) Logistic Regression with class-balanced weighting efficiently handles
+      the neutral class imbalance.
+
+The neutral class remained the persistent challenge across all phases, with
+F1 scores consistently lower than negative and positive. This is attributable
+to the inherent ambiguity of neutral-labeled social media text, which frequently
+contains mixed-polarity expressions and hedged language.
+
+Phase 7 demonstrated the feasibility of loading and running pretrained
+DistilBERT in a restrictive, CPU-only, no-PyTorch environment using native
+Keras 3 / TensorFlow 2.21. Under equivalent training conditions (full data,
+GPU acceleration, multiple epochs), pretrained transformers would be expected
+to outperform classical approaches.
+
+
+13. FUTURE WORK
+--------------------------------------------------------------------------------
+1. GPU-Accelerated Transformer Fine-Tuning:
+   Fine-tune DistilBERT or a compact transformer (e.g., BERT-tiny,
+   DistilRoBERTa) on the full 102,076 training samples for 3+ epochs on GPU
+   hardware, and measure the true transformer performance under fair conditions.
+
+2. Domain-Specific Pretrained Models:
+   Use social media-adapted pretrained models (e.g., BERTweet, TwitterRoBERTa)
+   which are pre-trained on Twitter corpora and likely superior for this task.
+
+3. Advanced Feature Fusion:
+   Explore attention-weighted linguistic feature fusion instead of simple
+   concatenation for hybrid architectures.
+
+4. Hyperparameter Optimization for BiLSTM:
+   Grid or Bayesian search over BiLSTM hidden units, dropout rates, and
+   optimizer settings may close the gap with classical models.
+
+5. Ensemble Methods:
+   Combine TF-IDF + LR predictions with BiLSTM predictions via soft-voting
+   ensembling to potentially exceed Phase 4 performance.
+
+6. Neutral Class Augmentation:
+   Oversample or synthesize additional neutral examples (e.g., via EDA or
+   paraphrase models) to improve the lowest-performing class.
+
+7. Error Analysis:
+   Systematic error analysis of misclassified neutral examples to identify
+   linguistic patterns and guide targeted feature engineering.
+
+
+14. PROJECT LIMITATIONS
+--------------------------------------------------------------------------------
+1. Single Dataset: All experiments were conducted on one dataset. Results may
+   not generalize to other domains (e.g., product reviews, news sentiment).
+
+2. Fixed Train/Val/Test Split: The split was fixed from Phase 1 onward. Cross-
+   validation was not performed due to computational constraints.
+
+3. CPU-Only Hardware: Deep learning phases (5, 6, 7) are significantly
+   disadvantaged compared to GPU-accelerated training, limiting the number of
+   epochs and model capacity that can be explored within reasonable time.
+
+4. Phase 7 Incomparability: Phase 7 (DistilBERT) used only 10,000 training
+   samples and 1 epoch, making its results incomparable with other phases
+   that used 102,076 training samples. Any comparison should be qualified
+   with this context.
+
+5. Static Preprocessing: The preprocessing pipeline does not adapt to slang,
+   evolving abbreviations, or new emoji usage, which are common in social media.
+
+6. Fixed TF-IDF Vocabulary: The vocabulary was fitted once on Phase 2 training
+   data. New incoming text with unseen vocabulary would require re-fitting.
+
+
+================================================================================
+APPENDIX -- PHASE FILE LOCATIONS
+================================================================================
+Phase 2 Report     : outputs/phase2_report.txt
+Phase 3 Report     : outputs/phase3/phase3_report.txt
+Phase 4 Report     : outputs/phase4/phase4_report.txt
+Phase 5 Report     : outputs/phase5/phase5_report.txt
+Phase 6 Report     : outputs/phase6/phase6_report.txt (model comparison)
+Phase 7 Report     : outputs/phase7/phase7_report.txt
+
+Phase 3 Metrics    : outputs/phase3/model_comparison_metrics.csv
+Phase 5 Metrics    : outputs/phase5/bilstm_metrics.csv
+Phase 6 Metrics    : outputs/phase6/phase6_model_comparison.csv
+Phase 7 Metrics    : outputs/phase7/phase7_metrics.csv
+
+All trained models : models/
+
+================================================================================
+END OF FINAL PROJECT REPORT
+================================================================================

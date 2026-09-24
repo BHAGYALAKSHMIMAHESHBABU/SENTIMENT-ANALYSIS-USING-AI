@@ -1,0 +1,147 @@
+================================================================================
+PHASE 7 — PRETRAINED DISTILBERT TRANSFORMER COMPREHENSIVE REPORT
+AI-Based Sentiment Analysis System
+================================================================================
+
+1. EXPERIMENT CONFIGURATION & DATASET SIZES
+--------------------------------------------------------------------------------
+  Model Architecture      : DistilBERT-base-uncased (Keras Hub + TensorFlow 2.21.0)
+  Pretrained Weights      : Local HuggingFace cache (model.safetensors, 100% mapped)
+  Tokenizer               : HuggingFace Fast Rust WordPiece Tokenizer (vocab: 30,522)
+  Max Sequence Length     : 128
+  Learning Rate           : 2e-05
+  Batch Size              : 32
+  Epochs                  : 1
+  Random Seed             : 42
+  Class Weights           : {0: 1.5532774153463809, 1: 0.6924248719013987, 2: 1.0964912280701755} (from sampled training set)
+  Input Features          : Original raw sentence text ONLY (no linguistic features)
+  Target Classes          : 3 classes (0: negative, 1: neutral, 2: positive)
+  Training Sample Size    : 10,000 rows (stratified sample from train_clean.csv)
+  Validation Set Size     : 5,420 rows (FULL val_clean.csv)
+  Test Set Size           : 6,530 rows (FULL test_clean.csv)
+  Total Parameters        : 66,955,779
+  Trainable Parameters    : 66,955,779
+
+2. COMPUTATIONAL ENVIRONMENT & LIMITATION DISCLOSURE
+--------------------------------------------------------------------------------
+  Hardware Environment    : Windows CPU execution (no GPU acceleration).
+  System Constraints      : PyTorch restricted by OS Application Control policy;
+                            tensorflow_text unavailable on Windows / Python 3.13;
+                            Keras Hub Kaggle preset downloads unavailable.
+  Execution Strategy      : Fully loaded pretrained weights from local safetensors
+                            into Keras Hub DistilBertBackbone with fast tokenizers.
+  CRITICAL LIMITATION     : Full fine-tuning on 102,076 samples on CPU would require
+                            approx. 14 hours per epoch (~42 hours for 3 epochs).
+                            To complete Phase 7 within the strict 2-hour window,
+                            a stratified sample of 10,000 training instances was
+                            fine-tuned for 1 epoch, evaluated on the entire full validation
+                            (5,420 samples) and full test (6,530 samples) sets.
+
+3. CROSS-PHASE MODEL COMPARISON
+--------------------------------------------------------------------------------
+Model Architecture                         Accuracy   Macro F1   Weighted F1  Delta vs P4 
+--------------------------------------------------------------------------------
+Phase 2 Baseline (TF-IDF + LR)             0.6629     0.6611     0.6635       -0.0046     
+Phase 4 Enhanced (TF-IDF + LingFeats + LR) 0.6669     0.6657     0.6674       +0.0000     
+Phase 5 BiLSTM (Trained from scratch)      0.6579     0.6557     0.6579       -0.0100     
+Phase 6 Best Hybrid (BiLSTM + Group B)     0.6649     0.6611     0.6639       -0.0046     
+Phase 7 Pretrained DistilBERT Transformer  0.5769     0.5697     0.5714       -0.0960     
+--------------------------------------------------------------------------------
+
+4. DETAILED TEST SET CLASSIFICATION METRICS
+--------------------------------------------------------------------------------
+  Test Accuracy           : 0.5769 (57.69%)
+  Test Macro Precision    : 0.5924
+  Test Macro Recall       : 0.5694
+  Test Macro F1           : 0.5697
+  Test Weighted F1        : 0.5714
+  Delta vs Phase 4 (0.6657): -0.0960
+
+Per-Class Classification Report (Test Set):
+              precision    recall  f1-score   support
+
+    negative     0.5930    0.4919    0.5378      2352
+     neutral     0.6459    0.4757    0.5479      1829
+    positive     0.5384    0.7407    0.6235      2349
+
+    accuracy                         0.5769      6530
+   macro avg     0.5924    0.5694    0.5697      6530
+weighted avg     0.5882    0.5769    0.5714      6530
+
+
+Test Set Confusion Matrix:
+  Predicted ->          Negative    Neutral    Positive
+  Actual Negative   : 1157        272        923       
+  Actual Neutral    : 390         870        569       
+  Actual Positive   : 404         205        1740      
+
+5. TRAINING HISTORY & CONVERGENCE
+--------------------------------------------------------------------------------
+Epoch    Train Loss     Train Accuracy   Val Loss       Val Accuracy  
+--------------------------------------------------------------------------------
+1        1.0228         0.4801           0.9440         0.5603        
+--------------------------------------------------------------------------------
+
+6. RESEARCH QUESTIONS & SYSTEMATIC ANALYSIS (Q1 — Q7)
+--------------------------------------------------------------------------------
+Q1: Does pretrained DistilBERT improve over the scratch BiLSTM?
+A1: DistilBERT achieved a Test Macro F1 of 0.5697 (Accuracy: 0.5769) versus the Phase 5 scratch
+    BiLSTM Test Macro F1 of 0.6557 (Accuracy: 0.6579). However, this comparison is not
+    equivalent: DistilBERT was trained on a restricted 10,000-sample stratified subset for
+    only 1 epoch due to CPU computational constraints, whereas the BiLSTM was trained on
+    the full 102,076 samples for 3 epochs.
+
+Q2: Does it exceed the Phase 4 benchmark Macro F1 = 0.6657?
+A2: NO. The Phase 4 benchmark (TF-IDF + 12 scaled linguistic features + Logistic Regression,
+    trained on all 102,076 samples) achieved Macro F1 = 0.6657. DistilBERT reached 0.5697
+    (Delta: -0.0960). Phase 4 holds the top benchmark because it combined the
+    complete training corpus with hand-crafted sentiment signals (negation counts, punctuation,
+    casing, and intensifiers), while DistilBERT was limited to 10,000 samples on CPU.
+
+Q3: How do negative/neutral/positive class F1 scores compare?
+A3: Per-class performance on the test set:
+    - Negative : Precision=0.5930, Recall=0.4919, F1=0.5378
+    - Neutral  : Precision=0.6459, Recall=0.4757, F1=0.5479
+    - Positive : Precision=0.5384, Recall=0.7407, F1=0.6235
+    Positive sentiment achieved the highest F1 score (0.6235) driven by high recall (0.7407).
+    Consistent with previous phases, neutral classification remained challenging, with
+    the lowest recall (0.4757) among all three categories.
+
+Q4: What does pretrained representation provide compared with scratch embeddings?
+A4: Scratch embeddings (Phase 5) suffer from cold-start semantic representations, capturing
+    only surface co-occurrences within the training corpus and failing to capture complex polysemy
+    or subtle linguistic shifts. Pretrained DistilBERT provides deep contextualized representations
+    trained on massive English corpora (BookCorpus + English Wikipedia). Each token embedding
+    is dynamically conditioned on its surrounding 128-token bidirectional context via multi-head
+    self-attention, capturing negation scope, syntactic dependencies, and nuance effortlessly.
+
+Q5: Is there evidence of overfitting from train/validation history?
+A5: Train loss was 1.0228 (accuracy 0.4801) while validation loss was 0.9440 (accuracy 0.5603).
+    No clear evidence of overfitting is visible within the single recorded epoch, but one
+    epoch is insufficient to assess longer-term overfitting or validation divergence.
+
+Q6: What is the computational cost?
+A6: DistilBERT contains 66,955,779 parameters across 6 transformer layers. On CPU:
+    - Training throughput   : ~2.88 samples/sec (total train time: 57m 49s)
+    - Inference throughput  : ~6.04 samples/sec (total test eval: 18m 0s)
+    - Full dataset training on CPU (102,076 samples for 3 epochs) would require ~42 hours,
+      making CPU fine-tuning on massive corpora impractical without GPU acceleration.
+    - In contrast, Phase 4 (TF-IDF + LR) trained in under 2 minutes with high throughput.
+
+Q7: Overall findings, limitations, and conclusion.
+A7: Key findings:
+    1. Feasibility & Implementation: Phase 7 is a constrained feasibility experiment
+       because it used a 10,000-sample training subset and 1 epoch on CPU. It fully
+       demonstrated that local cached HuggingFace DistilBERT safetensors can be cleanly
+       reconstructed and executed in native Keras 3 / TensorFlow 2.21 without requiring
+       blocked PyTorch or unavailable Kaggle downloads.
+    2. Benchmark Comparison: Among the completed experiments, Phase 4 achieved the
+       highest Macro F1 (0.6657).
+    3. Computational Reality: Pretrained transformer fine-tuning on CPU without GPU
+       acceleration entails high computational latency (~2.88 training samples/sec),
+       making complete full-dataset multi-epoch training prohibitive within standard
+       interactive timelines without hardware acceleration.
+
+================================================================================
+END OF PHASE 7 COMPREHENSIVE REPORT
+================================================================================

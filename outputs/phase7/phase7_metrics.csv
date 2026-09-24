@@ -1,0 +1,6 @@
+model,test_accuracy,test_macro_precision,test_macro_recall,test_macro_f1,test_weighted_f1,delta_vs_phase4_macro_f1
+Phase 2 Baseline (TF-IDF + LR),0.6629,0.6606,0.6625,0.6611,0.6635,-0.0046
+Phase 4 Enhanced (TF-IDF + LingFeats + LR),0.6669,0.6651,0.668,0.6657,0.6674,0.0
+Phase 5 BiLSTM (Trained from scratch),0.6579,0.6575,0.6549,0.6557,0.6579,-0.01
+Phase 6 Best Hybrid (BiLSTM + Group B),0.6649,0.6678,0.659,0.6611,0.6639,-0.0046
+Phase 7 Pretrained DistilBERT Transformer,0.5769,0.5924,0.5694,0.5697,0.5714,-0.096

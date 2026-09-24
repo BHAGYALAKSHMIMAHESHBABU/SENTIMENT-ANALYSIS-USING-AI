@@ -1,0 +1,74 @@
+==============================================================================
+PHASE 4 - LINGUISTIC FEATURE STATISTICAL ANALYSIS
+AI-Based Sentiment Analysis System
+==============================================================================
+
+Dataset Source: outputs/phase4/linguistic_features_train.csv (Training split only)
+Total Samples : 102,076
+
+Feature Definitions & Grouping:
+  Group A (Basic text statistics):
+    - word_count              : Whitespace-split token count
+    - character_count         : Total length including whitespace
+    - sentence_length         : Stripped string character length
+  Group B (Punctuation & capitalization):
+    - exclamation_count       : Count of '!' characters
+    - question_count          : Count of '?' characters
+    - uppercase_ratio         : Uppercase alphabetic chars / Total alphabetic chars
+    - uppercase_word_count    : Fully uppercase words with length >= 2
+  Group C (Sentiment linguistic cues):
+    - negation_count          : Occurrences of designated negation words
+    - intensifier_count       : Occurrences of designated intensifier adverbs
+    - contrast_word_count     : Occurrences of designated contrast discourse markers
+  Group D (Visual & repetition cues):
+    - emoji_count             : Unicode emoji symbols count
+    - repeated_character_count: Occurrences of 3+ consecutive identical characters
+
+------------------------------------------------------------------------------
+                     OVERALL TRAINING SET FEATURE SUMMARY                     
+------------------------------------------------------------------------------
+Feature                          Mean        Std      Min        Max   Non-Zero %
+------------------------------------------------------------------------------
+word_count                    13.6922     8.5110      1.0      258.0      100.00%
+character_count               71.5701    45.3464      4.0     1479.0      100.00%
+sentence_length               71.5685    45.3454      4.0     1479.0      100.00%
+exclamation_count              0.1028     0.4296      0.0       19.0        7.84%
+question_count                 0.0332     0.2126      0.0       10.0        2.91%
+uppercase_ratio                0.0505     0.0878      0.0        1.0       97.25%
+uppercase_word_count           0.1019     0.5383      0.0       31.0        6.86%
+emoji_count                    0.0000     0.0083      0.0        2.0        0.00%
+negation_count                 0.2062     0.4580      0.0        7.0       18.57%
+intensifier_count              0.1578     0.4062      0.0        6.0       14.34%
+contrast_word_count            0.0946     0.3007      0.0        3.0        9.23%
+repeated_character_count       0.0525     0.2577      0.0       10.0        4.64%
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+                   CLASS-WISE FEATURE MEANS (TRAINING SET)                    
+------------------------------------------------------------------------------
+Feature                          Negative        Neutral       Positive
+------------------------------------------------------------------------------
+word_count                        15.5591        12.4286        14.3755
+character_count                   81.6967        64.3687        75.8275
+sentence_length                   81.6945        64.3682        75.8247
+exclamation_count                  0.1056         0.0773         0.1412
+question_count                     0.0278         0.0491         0.0118
+uppercase_ratio                    0.0447         0.0558         0.0462
+uppercase_word_count               0.1294         0.0906         0.1002
+emoji_count                        0.0001         0.0001         0.0000
+negation_count                     0.3490         0.1670         0.1676
+intensifier_count                  0.2187         0.1081         0.1934
+contrast_word_count                0.1327         0.0735         0.1012
+repeated_character_count           0.0643         0.0474         0.0521
+------------------------------------------------------------------------------
+
+[CRITICAL EXPERIMENTAL OBSERVATION]
+  1. The differences in means across sentiment classes are empirical observations,
+     NOT proof that these features will improve downstream classification performance.
+  2. TF-IDF features already capture vocabulary and n-grams corresponding to words
+     like 'not', 'very', 'never', etc. Whether explicit feature counts provide supplementary
+     orthogonal signal or redundant noise must be determined by controlled experiment.
+  3. Features such as uppercase_ratio, exclamation_count, and emoji_count carry surface
+     expressive information not directly encoded in standard lowercased TF-IDF.
+  4. Feature scaling must be strictly fitted on training data only to avoid leakage.
+==============================================================================

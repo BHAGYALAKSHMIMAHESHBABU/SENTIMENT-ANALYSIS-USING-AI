@@ -1,0 +1,21 @@
+# AI-Based Sentiment Analysis Platform - Unified Dependencies
+# Supports both Streamlit Dashboard and FastAPI REST Backend
+
+# Web Frameworks
+streamlit>=1.35.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+
+# Machine Learning & Scientific Computing
+scikit-learn>=1.5.0
+scipy>=1.14.0
+numpy>=1.26.0
+pandas>=2.2.0
+
+# NLP & Feature Extraction
+emoji>=2.10.0
+
+# HTTP & Testing
+httpx>=0.27.0
+pytest>=8.0.0

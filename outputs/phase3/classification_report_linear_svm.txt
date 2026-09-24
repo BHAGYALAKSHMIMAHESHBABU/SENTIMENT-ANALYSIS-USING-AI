@@ -1,0 +1,28 @@
+============================================================
+Classification Report — Linear SVM (C=1.0, class_weight=balanced)
+============================================================
+
+[VALIDATION SET]
+              precision    recall  f1-score   support
+
+    negative     0.6971    0.5605    0.6214      1868
+     neutral     0.5683    0.7104    0.6315      1668
+    positive     0.6754    0.6571    0.6661      1884
+
+    accuracy                         0.6402      5420
+   macro avg     0.6469    0.6427    0.6397      5420
+weighted avg     0.6499    0.6402    0.6400      5420
+
+
+[TEST SET]
+              precision    recall  f1-score   support
+
+    negative     0.6847    0.5642    0.6186      2352
+     neutral     0.5473    0.6987    0.6138      1829
+    positive     0.6850    0.6582    0.6713      2349
+
+    accuracy                         0.6357      6530
+   macro avg     0.6390    0.6404    0.6346      6530
+weighted avg     0.6463    0.6357    0.6362      6530
+
+============================================================

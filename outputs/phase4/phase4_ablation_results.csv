@@ -1,0 +1,7 @@
+feature_group,accuracy,macro_f1,weighted_f1
+TF-IDF only (Baseline),0.6629,0.6611,0.6635
+TF-IDF + Group A (Text Statistics),0.6639,0.6626,0.6644
+TF-IDF + Group B (Punctuation & Casing),0.6662,0.6644,0.6666
+TF-IDF + Group C (Sentiment Cues),0.6642,0.6626,0.6648
+TF-IDF + Group D (Visual & Repetition),0.6617,0.6599,0.6623
+TF-IDF + All Linguistic Features,0.6669,0.6657,0.6674

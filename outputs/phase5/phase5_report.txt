@@ -1,0 +1,147 @@
+==============================================================================
+PHASE 5 - BIDIRECTIONAL LSTM (BiLSTM) COMPREHENSIVE REPORT
+AI-Based Sentiment Analysis System
+==============================================================================
+
+1. OBJECTIVE
+------------------------------------------------------------------------------
+Determine whether a Bidirectional LSTM neural sequence model can improve
+sentiment classification by learning word order and bidirectional context
+that TF-IDF does not explicitly represent.
+
+2. DEEP LEARNING ENVIRONMENT
+------------------------------------------------------------------------------
+  Python      : 3.13.15
+  TensorFlow  : 2.21.0
+  Keras       : 3.15.1
+  NumPy       : 2.2.6
+  pandas      : 3.0.5
+  Device      : CPU only (no GPU detected on native Windows TF >= 2.11)
+
+3. TEXT TOKENIZATION
+------------------------------------------------------------------------------
+  Tokenizer      : Keras Tokenizer (tensorflow.keras.preprocessing.text)
+  Fitted on      : TRAINING DATA ONLY (102,076 sentences)
+  Max vocab size : 40,000
+  Actual vocab   : 39,092 unique tokens in training set
+  OOV token      : '<OOV>' (index 1)
+  Vocab used in embedding: 39,093 (includes padding index 0)
+
+4. SEQUENCE LENGTH SELECTION
+------------------------------------------------------------------------------
+  Determined from TRAINING DATA ONLY
+  Min words             : 1
+  Mean words            : 13.69
+  50th percentile       : 12.0
+  90th percentile       : 25.0
+  95th percentile       : 29.0
+  99th percentile       : 40.0
+  Max observed          : 258
+  Selected MAX_SEQ_LEN  : 32
+  Samples truncated     : 3.12%
+  Samples padded        : 96.36%
+
+5. LABEL ENCODING
+------------------------------------------------------------------------------
+  negative → 0
+  neutral  → 1
+  positive → 2
+  (Original CSV label columns are NOT modified)
+
+6. TRAINING LABEL DISTRIBUTION & CLASS WEIGHTS
+------------------------------------------------------------------------------
+  negative: 21,903 samples | weight: 1.5535
+  neutral : 49,144 samples  | weight: 0.6924
+  positive: 31,029 samples | weight: 1.0966
+  Class weights computed from training labels ONLY.
+
+7. BILSTM ARCHITECTURE
+------------------------------------------------------------------------------
+  Layer 1 : Embedding(input_dim=39093, output_dim=128, mask_zero=False)
+  Layer 2 : Bidirectional(LSTM(units=64, return_sequences=False))
+  Layer 3 : Dropout(rate=0.3)
+  Layer 4 : Dense(units=64, activation='relu')
+  Layer 5 : Dense(units=3, activation='softmax')
+  Total parameters : 5,111,171
+  Loss function    : sparse_categorical_crossentropy
+  Optimizer        : Adam(learning_rate=0.001)
+  Batch size       : 256
+
+8. TRAINING CONFIGURATION
+------------------------------------------------------------------------------
+  Max epochs        : 12
+  EarlyStopping     : monitor=val_loss, patience=2, restore_best_weights=True
+  Epochs completed  : 3
+  Best epoch        : 1
+  Final train loss  : 0.5818
+  Final val loss    : 0.8943
+  Best val loss     : 0.8243
+
+9. VALIDATION RESULTS
+------------------------------------------------------------------------------
+  Accuracy         : 0.6469 (64.69%)
+  Macro F1         : 0.6468
+  Weighted F1      : 0.6470
+  Macro Precision  : 0.6471
+  Macro Recall     : 0.6469
+
+10. TEST RESULTS
+------------------------------------------------------------------------------
+  Accuracy         : 0.6579 (65.79%)
+  Macro F1         : 0.6557
+  Weighted F1      : 0.6579
+  Macro Precision  : 0.6575
+  Macro Recall     : 0.6549
+
+11. PER-CLASS TEST PERFORMANCE
+------------------------------------------------------------------------------
+BiLSTM Per-Class Report (Test Set):
+              precision    recall  f1-score   support
+
+    negative     0.6370    0.6841    0.6597      2352
+     neutral     0.6397    0.6173    0.6283      1829
+    positive     0.6958    0.6633    0.6792      2349
+
+    accuracy                         0.6579      6530
+   macro avg     0.6575    0.6549    0.6557      6530
+weighted avg     0.6589    0.6579    0.6579      6530
+
+
+  Neutral class F1 : 0.6283
+
+12. CONFUSION MATRICES (TEST SET)
+------------------------------------------------------------------------------
+  Labels order: [negative, neutral, positive]
+    negative  : [1609, 350, 393]
+    neutral   : [412, 1129, 288]
+    positive  : [505, 286, 1558]
+
+13. COMPARISON TABLE (TEST SET — PRIMARY METRIC: MACRO F1)
+------------------------------------------------------------------------------
+Model                                         Accuracy  Macro P  Macro R  Macro F1     W-F1
+------------------------------------------------------------------------------
+Phase 2: TF-IDF + Logistic Regression           0.6629   0.6606   0.6625    0.6611   0.6635
+Phase 4: TF-IDF + LingFeats + LR                0.6669   0.6651   0.6680    0.6657   0.6674
+Phase 5: BiLSTM (from scratch)                  0.6579   0.6575   0.6549    0.6557   0.6579
+------------------------------------------------------------------------------
+  BiLSTM vs Phase 2 Macro F1 : -0.0054
+  BiLSTM vs Phase 4 Macro F1 : -0.0100
+
+14. EXPERIMENTAL INTEGRITY VERIFICATION
+------------------------------------------------------------------------------
+  [OK] Raw data files (data/) unchanged
+  [OK] Phase 2 outputs unchanged
+  [OK] Phase 3 outputs unchanged
+  [OK] Phase 4 outputs unchanged
+  [OK] No train/val/test overlap (verified at runtime)
+  [OK] Tokenizer fitted on training data ONLY
+  [OK] Sequence length determined from training data ONLY
+  [OK] Class weights computed from training labels ONLY
+  [OK] No BERT, no transformers, no pretrained embeddings used
+  [OK] No linguistic features added to BiLSTM in this phase
+  [OK] Model evaluated on validation and test sets
+
+15. VERDICT: DID BILSTM IMPROVE THE BENCHMARK?
+------------------------------------------------------------------------------
+  NO. BiLSTM Test Macro F1 = 0.6557 did NOT surpass Phase 4 benchmark of 0.6657 (delta: -0.0100). Classical TF-IDF with enhanced features remains stronger.
+==============================================================================

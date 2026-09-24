@@ -1,0 +1,140 @@
+================================================================================
+AI-BASED SENTIMENT ANALYSIS SYSTEM: PHASE 1 DATASET INSPECTION REPORT
+================================================================================
+
+1. DATASET SIZES & STRUCTURE
+----------------------------------------
+  - TRAIN split:
+      Rows               : 102,097
+      Columns            : 4
+      Column Names       : ['sentence', 'label', 'source', 'split']
+      Data Types         : {'sentence': 'str', 'label': 'str', 'source': 'str', 'split': 'str'}
+      Total Missing Vals : 0
+      Exact Dupl. Rows   : 10
+  - VAL split:
+      Rows               : 5,421
+      Columns            : 4
+      Column Names       : ['sentence', 'label', 'source', 'split']
+      Data Types         : {'sentence': 'str', 'label': 'str', 'source': 'str', 'split': 'str'}
+      Total Missing Vals : 0
+      Exact Dupl. Rows   : 1
+  - TEST split:
+      Rows               : 6,530
+      Columns            : 4
+      Column Names       : ['sentence', 'label', 'source', 'split']
+      Data Types         : {'sentence': 'str', 'label': 'str', 'source': 'str', 'split': 'str'}
+      Total Missing Vals : 0
+      Exact Dupl. Rows   : 0
+  --> Combined Total Dataset Size: 114,048 samples
+
+2. IMPORTANT COLUMNS IDENTIFICATION
+----------------------------------------
+  - Text Column           : 'sentence' (Contains raw input text / review comments)
+  - Sentiment Label Column: 'label' (Contains categorical sentiment target)
+  - Metadata Columns      : 'source' (Origin benchmark e.g. dynasent_r1, dynasent_r2, sst_local)
+                            'split'  (Split tag: train, validation, test)
+
+3. SENTIMENT LABEL VALUES & MAPPING
+----------------------------------------
+  Observed unique values across all dataset splits:
+    - Train split unique labels: ['negative', 'neutral', 'positive']
+    - Val split unique labels: ['neutral', 'positive', 'negative']
+    - Test split unique labels: ['positive', 'negative', 'neutral']
+
+  Formal Label Mapping:
+    - 'negative' -> Negative sentiment polarity (Class index 0)
+    - 'neutral'  -> Neutral / objective statement  (Class index 1)
+    - 'positive' -> Positive sentiment polarity (Class index 2)
+  Note: Labels are string lowercase literals in raw data. No numeric encoding has been applied.
+
+4. CLASS DISTRIBUTION & IMBALANCE EVALUATION
+----------------------------------------
+  - TRAIN (Total: 102,097):
+      * Positive:  31,039 samples (30.40%)
+      * Neutral :  49,148 samples (48.14%)
+      * Negative:  21,910 samples (21.46%)
+      * Imbalance Ratio (Max/Min): 2.24x
+  - VAL (Total: 5,421):
+      * Positive:   1,884 samples (34.75%)
+      * Neutral :   1,669 samples (30.79%)
+      * Negative:   1,868 samples (34.46%)
+      * Imbalance Ratio (Max/Min): 1.13x
+  - TEST (Total: 6,530):
+      * Positive:   2,349 samples (35.97%)
+      * Neutral :   1,829 samples (28.01%)
+      * Negative:   2,352 samples (36.02%)
+      * Imbalance Ratio (Max/Min): 1.29x
+
+  Imbalance Assessment:
+    - Train Split      : Moderately skewed toward Neutral (~48.14%), followed by Positive (~30.40%)
+                         and Negative (~21.46%). Imbalance ratio is 2.24x.
+    - Validation Split : Well-balanced (~34.75% Positive, ~34.46% Negative, ~30.79% Neutral).
+    - Test Split       : Well-balanced (~36.02% Negative, ~35.97% Positive, ~28.01% Neutral).
+    - Conclusion       : Real-world benchmark natural distribution. Not critically imbalanced (no extreme
+                         rare classes like 1% vs 99%). Stratified sampling or class-weighted loss can be
+                         readily employed in training.
+
+5. DATA QUALITY CHECKS
+----------------------------------------
+  - TRAIN Quality Audit:
+      * Missing text (Null/NaN)     : 0
+      * Empty/Whitespace strings    : 0
+      * Duplicate sentences in split: 18
+      * Conflicting label sentences : 1
+          ! Conflict: "The service was okay." -> Assigned Labels: ['positive', 'neutral']
+      * Word Count Stats (min/med/avg/max): 1 / 12.0 / 13.69 / 258 words
+      * Character Length Stats (min/med/avg/max): 4 / 63.0 / 71.56 / 1479 chars
+      * Very Short Sentences (<=2 words): 3075
+      * Very Long Sentences (>=100 words): 9
+      * Non-ASCII / Emojis / Symbols : 690 sentences
+  - VAL Quality Audit:
+      * Missing text (Null/NaN)     : 0
+      * Empty/Whitespace strings    : 0
+      * Duplicate sentences in split: 1
+      * Conflicting label sentences : 0
+      * Word Count Stats (min/med/avg/max): 1 / 13.0 / 14.92 / 80 words
+      * Character Length Stats (min/med/avg/max): 5 / 70.0 / 78.28 / 411 chars
+      * Very Short Sentences (<=2 words): 79
+      * Very Long Sentences (>=100 words): 0
+      * Non-ASCII / Emojis / Symbols : 23 sentences
+  - TEST Quality Audit:
+      * Missing text (Null/NaN)     : 0
+      * Empty/Whitespace strings    : 0
+      * Duplicate sentences in split: 0
+      * Conflicting label sentences : 0
+      * Word Count Stats (min/med/avg/max): 1 / 14.0 / 15.64 / 115 words
+      * Character Length Stats (min/med/avg/max): 5 / 74.0 / 82.52 / 785 chars
+      * Very Short Sentences (<=2 words): 102
+      * Very Long Sentences (>=100 words): 1
+      * Non-ASCII / Emojis / Symbols : 26 sentences
+
+6. CROSS-SPLIT LEAKAGE & OVERLAP AUDIT
+----------------------------------------
+  - Train <-> Validation sentence overlap: 1
+      Overlap: "Hey Arnold !" | Train: neutral | Val: neutral
+  - Train <-> Test sentence overlap: 3
+      Overlap: "What 's next ?" | Train: positive | Test: positive (Label Match: True)
+      Overlap: "No. ." | Train: negative | Test: negative (Label Match: True)
+      Overlap: "I could not finish it." | Train: neutral | Test: negative (Label Match: False)
+  - Validation <-> Test sentence overlap: 0
+
+7. LINGUISTIC FEATURE PRESERVATION (MANDATORY RESTRICTION)
+----------------------------------------
+  CONFIRMED: Zero modifications were made to raw data files.
+  The raw text preserves:
+    * Punctuation (e.g. '!', '?', '...')
+    * Emojis and Unicode symbols (e.g. '😍', '👍', '😊')
+    * Capitalization (e.g. 'GOOD', 'GREAT')
+    * Repeated characters / lengthening (e.g. 'soooo good')
+    * Negations and intensifiers (e.g. 'not good', 'extremely bad')
+  These linguistic cues provide strong sentiment signals for subsequent phases.
+
+8. READINESS ASSESSMENT FOR PHASE 2
+----------------------------------------
+  Status: READY FOR PHASE 2 (Feature Engineering / Model Pipeline Design)
+  Key Recommendations for Preprocessing:
+    1. Deduplicate the 10 exact duplicate rows in train_all.csv and 1 duplicate row in val_all.csv.
+    2. Resolve the 1 conflicting sentence in train ('The service was okay.') during data preparation.
+    3. Remove the 3 test leakage sentences from train to guarantee 100% pure out-of-sample evaluation.
+    4. Handle the moderate class imbalance in train via weighted cross-entropy loss or balanced class weights.
+================================================================================

@@ -1,0 +1,161 @@
+======================================================================
+PHASE 3 — CLASSICAL MODEL COMPARISON REPORT
+AI-Based Sentiment Analysis System
+======================================================================
+
+[DATA LEAKAGE VERIFICATION]
+  Train/Val overlap : 0 sentences
+  Train/Test overlap: 0 sentences
+  Status: CLEAN — no leakage detected
+
+[DATASET SIZES (after Phase 3 train/val fix)]
+  Train : 102,076
+  Val   : 5,420
+  Test  : 6,530
+
+[TF-IDF CONFIGURATION (Phase 3)]
+  ngram_range         : (1, 2)
+  sublinear_tf        : True
+  min_df              : 2
+  max_df              : 0.95
+  strip_accents       : unicode
+  analyzer            : word
+  Vocabulary size     : 123,493 features
+  Fitted on train only. Val + Test are transformed only.
+  Saved: models/tfidf_vectorizer_phase3.pkl
+  NOTE: Phase 2 tfidf_vectorizer.pkl is UNCHANGED.
+
+============================================================
+MODEL 1: Logistic Regression (Phase 2 Baseline — NOT retrained)
+  Config: class_weight=balanced, C=1.0, max_iter=1000, solver=lbfgs
+============================================================
+  [VALIDATION]
+    accuracy              : 0.6531
+    macro_f1              : 0.6529
+    weighted_f1           : 0.6533
+    macro_precision       : 0.6535
+    macro_recall          : 0.6540
+  [TEST]
+    accuracy              : 0.6629
+    macro_f1              : 0.6611
+    weighted_f1           : 0.6635
+    macro_precision       : 0.6606
+    macro_recall          : 0.6625
+  Per-class Test F1:
+    negative    : 0.6546
+    neutral     : 0.6315
+    positive    : 0.6973
+  Saved: models/logistic_regression_baseline.pkl (Phase 2, UNCHANGED)
+
+============================================================
+MODEL 2: Multinomial Naive Bayes
+  Config: alpha=1.0
+============================================================
+  [VALIDATION]
+    accuracy              : 0.5212
+    macro_f1              : 0.4951
+    weighted_f1           : 0.4927
+    macro_precision       : 0.6273
+    macro_recall          : 0.5338
+  [TEST]
+    accuracy              : 0.5369
+    macro_f1              : 0.5208
+    weighted_f1           : 0.5184
+    macro_precision       : 0.6278
+    macro_recall          : 0.5598
+
+  Per-class Test Report:
+              precision    recall  f1-score   support
+
+    negative     0.7843    0.2504    0.3796      2352
+     neutral     0.4072    0.8458    0.5498      1829
+    positive     0.6919    0.5832    0.6329      2349
+
+    accuracy                         0.5369      6530
+   macro avg     0.6278    0.5598    0.5208      6530
+weighted avg     0.6454    0.5369    0.5184      6530
+
+  Confusion Matrix (Test, rows=actual, cols=predicted):
+    negative  : [589, 1350, 413]
+    neutral   : [85, 1547, 197]
+    positive  : [77, 902, 1370]
+  Saved: models/multinomial_naive_bayes.pkl
+
+============================================================
+MODEL 3: Linear SVM
+  Config: C=1.0, class_weight=balanced, random_state=42
+============================================================
+  [VALIDATION]
+    accuracy              : 0.6402
+    macro_f1              : 0.6397
+    weighted_f1           : 0.6400
+    macro_precision       : 0.6469
+    macro_recall          : 0.6427
+  [TEST]
+    accuracy              : 0.6357
+    macro_f1              : 0.6346
+    weighted_f1           : 0.6362
+    macro_precision       : 0.6390
+    macro_recall          : 0.6404
+
+  Per-class Test Report:
+              precision    recall  f1-score   support
+
+    negative     0.6847    0.5642    0.6186      2352
+     neutral     0.5473    0.6987    0.6138      1829
+    positive     0.6850    0.6582    0.6713      2349
+
+    accuracy                         0.6357      6530
+   macro avg     0.6390    0.6404    0.6346      6530
+weighted avg     0.6463    0.6357    0.6362      6530
+
+  Confusion Matrix (Test, rows=actual, cols=predicted):
+    negative  : [1327, 594, 431]
+    neutral   : [271, 1278, 280]
+    positive  : [340, 463, 1546]
+  NOTE: LinearSVC has no predict_proba; decision scores saved instead.
+  Saved: models/linear_svm.pkl
+
+======================================================================
+PHASE 3 — MODEL COMPARISON SUMMARY (TEST SET)
+======================================================================
+Model                                 Acc  MacroF1   WtdF1  MacroPr  MacroRe
+----------------------------------------------------------------------------
+Logistic Regression (Phase 2)      0.6629   0.6611  0.6635   0.6606   0.6625
+Multinomial Naive Bayes            0.5369   0.5208  0.5184   0.6278   0.5598
+Linear SVM                         0.6357   0.6346  0.6362   0.6390   0.6404
+
+Per-class Test F1 (primary diagnostic — Neutral is hardest):
+Model                               Negative  Neutral  Positive
+---------------------------------------------------------------
+Logistic Regression (Phase 2)         0.6546   0.6315    0.6973
+Multinomial Naive Bayes               0.3796   0.5498    0.6329
+Linear SVM                            0.6186   0.6138    0.6713
+
+Ranking by Test Macro F1:
+  1. Logistic Regression (Phase 2)      Macro F1 = 0.6611
+  2. Linear SVM                         Macro F1 = 0.6346
+  3. Multinomial Naive Bayes            Macro F1 = 0.5208
+
+[WARNINGS AND NOTES]
+  1. LR results are from Phase 2 (train had 102,077 rows then). New train has 102,076 (1 row removed for train/val overlap fix).
+  2. MultinomialNB requires non-negative features; TF-IDF sublinear_tf satisfies this (log(1+tf) >= 0).
+  3. LinearSVC has no predict_proba. Decision scores are saved instead.
+  4. Phase 2 outputs and models are UNCHANGED.
+  5. Raw data/ files are UNCHANGED.
+
+[PHASE 3 OUTPUT FILES]
+  classification_report_linear_svm.txt
+  classification_report_naive_bayes.txt
+  confusion_matrix_linear_svm.png
+  confusion_matrix_naive_bayes.png
+  model_comparison_metrics.csv
+  predictions_linear_svm_test.csv
+  predictions_linear_svm_val.csv
+  predictions_naive_bayes_test.csv
+  predictions_naive_bayes_val.csv
+  models/multinomial_naive_bayes.pkl
+  models/linear_svm.pkl
+  models/tfidf_vectorizer_phase3.pkl
+
+======================================================================

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiment Analyzer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-icon">&#x1F9E0;</span>
+        <div>
+          <h1 class="title">Sentiment Analyzer</h1>
+          <p class="subtitle">Phase 4 &bull; TF-IDF + Logistic Regression</p>
+        </div>
+      </div>
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Checking...</span>
+      </div>
+    </header>
+
+    <!-- Workflow hints -->
+    <div class="workflow-hints">
+      <span class="wf-chip">&#x1F4CB; Type / paste text</span>
+      <span class="wf-sep">&bull;</span>
+      <span class="wf-chip">&#x1F4C4; Select &rarr; open popup</span>
+      <span class="wf-sep">&bull;</span>
+      <span class="wf-chip">&#x1F5B1; Right-click selected text</span>
+    </div>
+
+    <!-- Input -->
+    <main class="main-content">
+      <div class="input-group">
+        <div class="label-row">
+          <label for="reviewInput">Text to Analyze</label>
+          <span class="hint-text" id="selectionHint">Selection auto-detected</span>
+        </div>
+        <textarea
+          id="reviewInput"
+          rows="5"
+          placeholder="Highlight text on a webpage, or type / paste here.&#10;Ctrl+Enter to analyze quickly."
+        ></textarea>
+      </div>
+
+      <!-- Buttons — always visible -->
+      <div class="button-group">
+        <button id="analyzeBtn" class="btn btn-primary" type="button">
+          <span id="btnText">Analyze</span>
+          <span id="spinner" class="spinner" style="display:none;"></span>
+        </button>
+        <button id="clearBtn" class="btn btn-secondary" type="button">Clear</button>
+      </div>
+
+      <!-- Error -->
+      <div id="errorAlert" class="alert alert-error" style="display:none;">
+        <span class="alert-icon">&#9888;&#65039;</span>
+        <span id="errorMessage" class="alert-msg"></span>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsCard" class="results-card" style="display:none;">
+        <div class="result-header">
+          <span class="result-label">Predicted Sentiment</span>
+          <div id="sentimentBadge" class="sentiment-badge">&#8212;</div>
+        </div>
+
+        <div class="confidence-row">
+          <span class="conf-label">Confidence</span>
+          <span id="confidenceValue" class="conf-value">&#8212;</span>
+        </div>
+
+        <div class="prob-section">
+          <div class="prob-item">
+            <div class="prob-header">
+              <span class="prob-name text-pos">Positive</span>
+              <span id="posProb" class="prob-pct">0.0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="posBar" class="progress-fill fill-pos" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-header">
+              <span class="prob-name text-neu">Neutral</span>
+              <span id="neuProb" class="prob-pct">0.0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="neuBar" class="progress-fill fill-neu" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="prob-item">
+            <div class="prob-header">
+              <span class="prob-name text-neg">Negative</span>
+              <span id="negProb" class="prob-pct">0.0%</span>
+            </div>
+            <div class="progress-track">
+              <div id="negBar" class="progress-fill fill-neg" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="apiLabel">API: http://127.0.0.1:8000</span>
+      <span class="version-tag">v1.1.0</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

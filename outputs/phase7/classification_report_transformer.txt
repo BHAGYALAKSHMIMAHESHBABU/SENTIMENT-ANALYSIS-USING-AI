@@ -1,0 +1,13 @@
+Phase 7 DistilBERT — Classification Report (Test Set)
+============================================================
+
+              precision    recall  f1-score   support
+
+    negative     0.5930    0.4919    0.5378      2352
+     neutral     0.6459    0.4757    0.5479      1829
+    positive     0.5384    0.7407    0.6235      2349
+
+    accuracy                         0.5769      6530
+   macro avg     0.5924    0.5694    0.5697      6530
+weighted avg     0.5882    0.5769    0.5714      6530
+
